@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import ServerRequest from './ServerRequest';
-
+/a
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,3 +13,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Chama sua função de backend
   await ServerRequest(req, res);
 }
+
