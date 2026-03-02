@@ -1,19 +1,23 @@
 // api/users.ts
+
+// Interface de usuário
 export interface User {
   email: string;
   password: string;
   username: string;
 }
 
-// Usuários de teste
+// Lista de usuários de teste
 const users: User[] = [
   { email: 'teste@teste.com', password: '12345678', username: 'teste' },
 ];
 
-export function getAllUsers() {
+// Função para retornar todos os usuários
+export function getAllUsers(): User[] {
   return users;
 }
 
-export function findUserByEmail(email: string) {
+// Função para buscar usuário por email
+export function findUserByEmail(email: string): User | undefined {
   return users.find(u => u.email === email);
 }
