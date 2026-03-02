@@ -4,6 +4,8 @@ import { findUserByEmail } from './users';
 
 // Export default para compatibilidade com backend.ts
 export default async function ServerRequest(req: VercelRequest, res: VercelResponse) {
+
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Método não permitido' });
   }
@@ -21,3 +23,4 @@ export default async function ServerRequest(req: VercelRequest, res: VercelRespo
 
   return res.status(200).json({ success: true, user: { email: user.email, username: user.username } });
 }
+//ssss
