@@ -1,7 +1,7 @@
 import { findUserByEmail, getAllUsers } from "./users.js"; // suas funções
 import { supabaseAdmin } from "./banco.js";
 import { VercelRequest, VercelResponse } from '@vercel/node';
-
+//ssss
 export default async function handler(
   request: VercelRequest,
   response: VercelResponse
@@ -34,3 +34,4 @@ export default async function handler(
     return response.status(500).json({ error: 'Erro interno do servidor' });
   }
 }
+
