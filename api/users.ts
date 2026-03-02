@@ -1,10 +1,11 @@
 // api/users.ts
-interface User {
+export interface User {
   email: string;
   password: string;
   username: string;
 }
 
+// Usuários de teste
 const users: User[] = [
   { email: 'teste@teste.com', password: '12345678', username: 'teste' },
 ];
