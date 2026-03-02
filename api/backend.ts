@@ -6,3 +6,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Apenas repassa para ServerRequest
   return ServerRequest(req, res);
 }
+
+//ss
