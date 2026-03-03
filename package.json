@@ -6,6 +6,9 @@
     "build": "tsc",
     "preinstall": "npx npm-force-resolutions"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "@vercel/node": "^4.0.0",
