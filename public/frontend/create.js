@@ -169,6 +169,8 @@
     <!-- RECAPTCHA V3 -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LeIrn4sAAAAAEmDmijVjHsMq3t0YIwq7rD5e9FW"></script>
     <!-- Your JS -->
-    <script type="module" src="create.js"></script>
+    <script type="module" src="./create.js"></script>
+                            
 </body>
 </html>
+
