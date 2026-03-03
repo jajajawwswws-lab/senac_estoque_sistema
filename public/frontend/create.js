@@ -1,416 +1,174 @@
-// create_account.js - VERSÃO FINAL COM LOCALSTORAGE FUNCIONAL
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create Account for Estoque Senac">
 
-// DEFINIR A FUNÇÃO GLOBAL ONSUBMIT IMEDIATAMENTE (fora do DOMContentLoaded)
-window.onSubmit = function(token) {
-    console.log("onSubmit called with token:", token);
-    // A implementação será sobrescrita dentro do DOMContentLoaded
-    // mas isso garante que a função existe quando o reCAPTCHA carregar
-};
-//l
-document.addEventListener('DOMContentLoaded', function() {
-    // Elementos do DOM
-    const form = document.getElementById('registrationForm');
-    const usernameInput = document.getElementById('username');
-    const emailInput = document.getElementById('email');
-    const phoneInput = document.getElementById('phone');
-    const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
-    const togglePasswordBtn = document.getElementById('togglePassword');
-    const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPassword');
-    const passwordStrengthDiv = document.getElementById('passwordStrength');
-    const strengthBar = document.getElementById('strengthBar');
-    const strengthText = document.getElementById('strengthText');
-    const passwordMatchMessage = document.getElementById('passwordMatchMessage');
-    const submitButton = document.getElementById('submitButton');
-    const result = document.getElementById('result');
-
-    // Validação em tempo real
-    let isFormValid = {
-        username: false,
-        email: false,
-        phone: false,
-        password: false,
-        confirmPassword: false
-    };
-
-    // Toggle de visibilidade da senha
-    if (togglePasswordBtn) {
-        togglePasswordBtn.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            const icon = this.querySelector('i');
-            if (icon) {
-                icon.classList.toggle('fa-eye');
-                icon.classList.toggle('fa-eye-slash');
-            }
-        });
-    }
-
-    if (toggleConfirmPasswordBtn) {
-        toggleConfirmPasswordBtn.addEventListener('click', function() {
-            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPasswordInput.setAttribute('type', type);
-            const icon = this.querySelector('i');
-            if (icon) {
-                icon.classList.toggle('fa-eye');
-                icon.classList.toggle('fa-eye-slash');
-            }
-        });
-    }
-
-    // Validação de username
-    usernameInput.addEventListener('input', function() {
-        const username = this.value.trim();
-        const pattern = /^[a-zA-Z0-9_]+$/;
-        
-        if (username.length < 3) {
-            showFieldError(this, 'Username must be at least 3 characters');
-            isFormValid.username = false;
-        } else if (username.length > 30) {
-            showFieldError(this, 'Username cannot exceed 30 characters');
-            isFormValid.username = false;
-        } else if (!pattern.test(username)) {
-            showFieldError(this, 'Only letters, numbers and underscores allowed');
-            isFormValid.username = false;
-        } else {
-            clearFieldError(this);
-            isFormValid.username = true;
-        }
-        updateSubmitButton();
-    });
-
-    // Validação de email
-    emailInput.addEventListener('input', function() {
-        const email = this.value.trim();
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        if (!email) {
-            showFieldError(this, 'Email is required');
-            isFormValid.email = false;
-        } else if (!emailPattern.test(email)) {
-            showFieldError(this, 'Please enter a valid email address');
-            isFormValid.email = false;
-        } else {
-            clearFieldError(this);
-            isFormValid.email = true;
-        }
-        updateSubmitButton();
-    });
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    // Formatação e validação de telefone
-    phoneInput.addEventListener('input', function() {
-        clearFieldError(this);
-        
-        const phoneDigits = this.value.replace(/\D/g, '');
-        
-        if (phoneDigits.length <= 11) {
-            let formattedValue = phoneDigits;
-            
-            if (phoneDigits.length > 2) {
-                formattedValue = '(' + phoneDigits.substring(0, 2) + ') ' + phoneDigits.substring(2);
-            }
-            
-            if (phoneDigits.length > 7) {
-                formattedValue = '(' + phoneDigits.substring(0, 2) + ') ' + 
-                               phoneDigits.substring(2, 7) + '-' + 
-                               phoneDigits.substring(7, 11);
-            }
-            
-            this.value = formattedValue;
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <title>Create Account - Estoque Senac</title>
+    
+    <style>
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        const digitCount = phoneDigits.length;
-        
-        // Validar DDDs brasileiros válidos
-        if (digitCount >= 10) {
-            const regex_phone = /^\((11|12|13|14|15|16|17|18|19|21|22|24|27|28|31|32|33|34|35|37|38|41|42|43|44|45|46|47|48|49|51|53|54|55|61|62|63|64|65|66|67|68|69|71|73|74|75|77|79|81|82|83|84|85|86|87|88|89|91|92|93|94|95|96|97|98|99)\)\s?\d{4,5}-\d{4}$/;
-            
-            if (!regex_phone.test(this.value)) {
-                showFieldError(this, 'Please use a valid Brazilian phone number');
-                isFormValid.phone = false;
-            } else {
-                isFormValid.phone = true;
-            }
-        } else {
-            if (digitCount > 0) {
-                showFieldError(this, 'Phone number must have at least 10 digits');
-            }
-            isFormValid.phone = false;
+        body {
+            padding-top: 180px;
         }
         
-        updateSubmitButton();
-    });
-
-    // Validação de força da senha
-    passwordInput.addEventListener('input', function() {
-        const password = this.value;
-        
-        if (passwordStrengthDiv) {
-            passwordStrengthDiv.classList.remove('hidden');
+        .header-images {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
         }
-        
-        const strength = calculatePasswordStrength(password);
-        updatePasswordStrengthIndicator(strength);
-        
-        if (password.length < 8) {
-            showFieldError(this, 'Password must be at least 8 characters');
-            isFormValid.password = false;
-        } else {
-            clearFieldError(this);
-            isFormValid.password = true;
-        }
-        
-        checkPasswordMatch();
-        updateSubmitButton();
-    });
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
 
-    // Validação de confirmação de senha
-    confirmPasswordInput.addEventListener('input', function() {
-        checkPasswordMatch();
-        updateSubmitButton();
-    });
+    <link rel="stylesheet" href="style.css">
 
-    function checkPasswordMatch() {
-        const password = passwordInput.value;
-        const confirmPassword = confirmPasswordInput.value;
-        
-        if (!confirmPassword) {
-            if (passwordMatchMessage) {
-                passwordMatchMessage.innerHTML = '';
-            }
-            confirmPasswordInput.style.borderColor = '';
-            isFormValid.confirmPassword = false;
-            return;
-        }
-        
-        if (password === confirmPassword) {
-            if (passwordMatchMessage) {
-                passwordMatchMessage.innerHTML = '<span class="text-green-600">✓ Passwords match</span>';
-            }
-            confirmPasswordInput.style.borderColor = '#10B981';
-            isFormValid.confirmPassword = true;
-        } else {
-            if (passwordMatchMessage) {
-                passwordMatchMessage.innerHTML = '<span class="text-red-600">✗ Passwords do not match</span>';
-            }
-            confirmPasswordInput.style.borderColor = '#EF4444';
-            isFormValid.confirmPassword = false;
-        }
-    }
+    <!-- Header FIXO -->
+    <header class="fixed-header">
+        <hr style="border: none; height: 75px; background-color: rgb(6, 43, 124); margin: 0;">
+        <hr style="border: none; height: 25px; background-color: rgb(250, 166, 40); margin: 0;">
+        <div class="header-images">
+            <img src="senac-logo-png_seeklogo-205285.png" alt="logo" class="w-16">
+            <img src="2066642.png" alt="logo" class="w-8">
+        </div>
+    </header>
 
-    function calculatePasswordStrength(password) {
-        if (!password) return 0;
-        
-        let score = 0;
-        
-        // Comprimento
-        if (password.length >= 8) score += 1;
-        if (password.length >= 12) score += 1;
-        
-        // Complexidade
-        if (/[a-z]/.test(password)) score += 1;
-        if (/[A-Z]/.test(password)) score += 1;
-        if (/[0-9]/.test(password)) score += 1;
-        if (/[^a-zA-Z0-9]/.test(password)) score += 1;
-        
-        // Ajustar para escala de 1-5
-        return Math.min(Math.max(Math.floor(score / 2) + 1, 1), 5);
-    }
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 max-w-md mt-8 mb-20">
+        <div class="bg-white border border-gray-300 rounded-lg shadow-sm p-6 md:p-8">
+            <h1 class="text-3xl font-normal mb-6 text-center md:text-left" style="color: #0066C0;">
+                Create Account
+            </h1>
 
-    function updatePasswordStrengthIndicator(strength) {
-        if (!strengthBar || !strengthText) return;
-        
-        const colors = ['#EF4444', '#F59E0B', '#F59E0B', '#10B981', '#10B981'];
-        const texts = ['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'];
-        
-        const index = Math.max(0, Math.min(strength - 1, 4));
-        const percentage = (strength / 5) * 100;
-        
-        strengthBar.style.width = `${percentage}%`;
-        strengthBar.style.backgroundColor = colors[index];
-        strengthText.textContent = texts[index];
-        strengthText.style.color = colors[index];
-    }
+            <!-- FORMULÁRIO -->
+            <form id="registrationForm" class="space-y-6">
+                <!-- Username -->
+                <div class="space-y-2">
+                    <label for="username" class="block font-medium text-gray-700">
+                        Username <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           required
+                           placeholder="Choose a username"
+                           minlength="3"
+                           maxlength="30"
+                           pattern="[a-zA-Z0-9_]+"
+                           class="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 transition-colors duration-200">
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs text-gray-500">Only letters, numbers, and underscores. 3-30 characters.</p>
+                        <span class="text-xs text-gray-500">Required</span>
+                    </div>
+                </div>
 
-    function showFieldError(inputElement, message) {
-        clearFieldError(inputElement);
-        
-        inputElement.classList.add('border-red-500');
-        
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'mt-1 text-sm text-red-600 fade-in';
-        errorDiv.textContent = message;
-        
-        inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
-    }
+                <!-- Email -->
+                <div class="space-y-2">
+                    <label for="email" class="block font-medium text-gray-700">
+                        Email Address <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           required
+                           placeholder="Enter your email"
+                           class="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 transition-colors duration-200">
+                </div>
 
-    function clearFieldError(inputElement) {
-        inputElement.classList.remove('border-red-500');
-        
-        const errorDiv = inputElement.parentNode.querySelector('.text-red-600');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
-    }
+                <!-- Phone -->
+                <div class="space-y-2">
+                    <label for="phone" class="block font-medium text-gray-700">
+                        Phone Number <span class="text-red-500">*</span>
+                    </label>
+                    <input type="tel" 
+                           id="phone" 
+                           name="phone" 
+                           required
+                           placeholder="(11) 99999-9999"
+                           pattern="\([0-9]{2}\)\s[0-9]{4,5}-[0-9]{4}"
+                           class="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 transition-colors duration-200">
+                </div>
 
-    function updateSubmitButton() {
-        const allValid = isFormValid.username && 
-                        isFormValid.email && 
-                        isFormValid.phone && 
-                        isFormValid.password && 
-                        isFormValid.confirmPassword;
-        
-        submitButton.disabled = !allValid;
-        
-        if (allValid) {
-            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-            submitButton.style.backgroundColor = '#FAA628';
-            submitButton.style.cursor = 'pointer';
-        } else {
-            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-            submitButton.style.backgroundColor = '#D1D5DB';
-            submitButton.style.cursor = 'not-allowed';
-        }
-    }
+                <!-- Password -->
+                <div class="space-y-2">
+                    <label for="password" class="block font-medium text-gray-700">Password <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               required
+                               minlength="8"
+                               placeholder="Create a strong password"
+                               class="w-full px-3 py-2.5 border border-gray-300 rounded-md pr-10 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 transition-colors duration-200">
+                        <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div id="passwordStrength" class="hidden mt-2">
+                        <div class="flex items-center space-x-2">
+                            <div class="h-1 flex-1 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="strengthBar" class="h-full w-0 transition-all duration-300"></div>
+                            </div>
+                            <span id="strengthText" class="text-xs font-medium"></span>
+                        </div>
+                    </div>
+                </div>
 
-    // Variável de controle para evitar múltiplos envios
-    let isSubmitting = false;
+                <!-- Confirm Password -->
+                <div class="space-y-2">
+                    <label for="confirmPassword" class="block font-medium text-gray-700">Confirm Password <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="password" 
+                               id="confirmPassword" 
+                               name="confirmPassword" 
+                               required
+                               minlength="8"
+                               placeholder="Confirm your password"
+                               class="w-full px-3 py-2.5 border border-gray-300 rounded-md pr-10 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 transition-colors duration-200">
+                        <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" id="toggleConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div id="passwordMatchMessage" class="text-sm mt-1"></div>
+                </div>
 
-    // IMPLEMENTAÇÃO CORRIGIDA - SALVA NO LOCALSTORAGE
-    window.onSubmit = function(token) {
-        // Prevenir múltiplos envios
-        if(isSubmitting) {
-            console.log("Submissão já em andamento...");
-            return;
-        }
+                <!-- Submit Button -->
+                <button type="button" 
+                        id="submitButton" 
+                        class="w-full border border-gray-400 rounded-md py-3 px-4 text-sm font-medium hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+                        disabled
+                        style="background-color: #FAA628; color: white;">
+                    Create your Estoque Senac account
+                </button>
 
-        // Validar elementos necessários
-        if(!emailInput || !passwordInput || !confirmPasswordInput || !result) {
-            console.error('Elementos do formulário não encontrados');
-            alert('Erro ao carregar o formulário. Elementos não encontrados.');
-            return;
-        }
+                <!-- Result Message -->
+                <div id="result" class="text-center mt-4 font-medium"></div>
 
-        // Obter valores
-        const gmail = emailInput.value.trim();
-        const pass_word = passwordInput.value.trim();
-        const require_pass_word = confirmPasswordInput.value.trim();
-        const username = usernameInput ? usernameInput.value.trim() : '';
-        const phone = phoneInput ? phoneInput.value.trim() : '';
+            </form>
+        </div>
+    </main>
 
-        // Validar campos
-        if (!gmail || !pass_word || !require_pass_word || !username) {
-            result.style.color = "red";
-            result.textContent = "❌ Preencha todos os campos!";
-            return;
-        }
-
-        if (pass_word !== require_pass_word) {
-            result.style.color = "red";
-            result.textContent = "❌ As senhas não conferem!";
-            return;
-        }
-
-        if (pass_word.length < 8) {
-            result.style.color = "red";
-            result.textContent = "❌ A senha deve ter pelo menos 8 caracteres!";
-            return;
-        }
-
-        // Marcar como enviando
-        isSubmitting = true;
-        
-        // Mostrar mensagem de carregamento
-        result.style.color = "black";
-        result.textContent = "🔄 Criando sua conta...";
-
-        // ===== SALVAR NO LOCALSTORAGE =====
-        setTimeout(() => {
-            try {
-                // Buscar usuários existentes
-                const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-                
-                console.log("📋 Usuários existentes:", usuarios);
-
-                // Verificar se email já existe
-                if (usuarios.some(u => u.email === gmail)) {
-                    result.style.color = "red";
-                    result.textContent = "❌ Este email já está cadastrado!";
-                    isSubmitting = false;
-                    return;
-                }
-
-                // Criar novo usuário
-                const novoUsuario = {
-                    email: gmail,
-                    password: pass_word,
-                    username: username,
-                    phone: phone || '',
-                    createdAt: new Date().toISOString()
-                };
-
-                // Adicionar à lista
-                usuarios.push(novoUsuario);
-
-                // 🔴 SALVAR NO LOCALSTORAGE
-                localStorage.setItem('usuarios', JSON.stringify(usuarios));
-
-                // Mostrar no console
-                console.log("✅ USUÁRIO SALVO NO LOCALSTORAGE!");
-                console.log("📋 Dados:", novoUsuario);
-                console.log("📊 Total de usuários agora:", usuarios.length);
-                console.log("👤 Todos os emails:", usuarios.map(u => u.email));
-
-                // Mostrar sucesso
-                result.style.color = "green";
-                result.textContent = "✅ Conta criada com sucesso!";
-
-                // Redirecionar para login
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 2000);
-
-            } catch (error) {
-                console.error("❌ Erro:", error);
-                result.style.color = "red";
-                result.textContent = "❌ Erro ao criar conta.";
-                isSubmitting = false;
-            }
-        }, 1500);
-    };
-
-    // Adicionar evento de clique ao botão para executar reCAPTCHA
-    submitButton.addEventListener('click', function(event) {
-        event.preventDefault();
-        
-        // Verificar se o botão está habilitado
-        if (submitButton.disabled) {
-            return;
-        }
-        
-        // Executar reCAPTCHA
-        grecaptcha.ready(function() {
-            grecaptcha.execute('6LeIrn4sAAAAAEmDmijVjHsMq3t0YIwq7rD5e9FW', {action: 'submit'}).then(function(token) {
-                // Chamar nossa função onSubmit com o token
-                window.onSubmit(token);
-            });
-        });
-    });
-
-    // Prevenir submissão padrão do formulário
-    if (form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-        });
-    }
-
-    // Validação inicial silenciosa após carregar a página
-    setTimeout(() => {
-        usernameInput.dispatchEvent(new Event('input'));
-        emailInput.dispatchEvent(new Event('input'));
-        phoneInput.dispatchEvent(new Event('input'));
-        passwordInput.dispatchEvent(new Event('input'));
-        confirmPasswordInput.dispatchEvent(new Event('input'));
-    }, 100);
-});
-
+    <!-- RECAPTCHA V3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeIrn4sAAAAAEmDmijVjHsMq3t0YIwq7rD5e9FW"></script>
+    <!-- Your JS -->
+    <script type="module" src="create.js"></script>
+</body>
+</html>
