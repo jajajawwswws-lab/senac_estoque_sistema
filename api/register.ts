@@ -1,25 +1,26 @@
 // api/register.ts
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { VercelRequest, VercelResponse } from '@vercel/node';
- //
-// Supabase s
+
+// Supabase (teste, chave exposta só para protótipo)
 const SUPABASE_URL = 'https://fbbkshvhbfgdopsgtlxi.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiYmtzaHZoYmZnZG9wc2d0bHhpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTg3MzYyOSwiZXhwIjoyMDg3NDQ5NjI5fQ.3a6zBgyKhPyUUIJLuaA8W3qEcv-_JfQsgDF_M9AAnQY';
+const SUPABASE_SERVICE_ROLE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiYmtzaHZoYmZnZG9wc2d0bHhpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTg3MzYyOSwiZXhwIjoyMDg3NDQ5NjI5fQ.3a6zBgyKhPyUUIJLuaA8W3qEcv-_JfQsgDF_M9AAnQY';
 
 const supabaseAdmin: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
-//q
-// reCAPTCHA secret key (do Google)
+
+// reCAPTCHA secret key
 const RECAPTCHA_SECRET = '6LdIoX4sAAAAAA8_bs3lzReNDXama96FcCzrdpop';
 
-async function verifyRecaptcha(token: string) {
+async function verifyRecaptcha(token: string): Promise<boolean> {
   const response = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `secret=${RECAPTCHA_SECRET}&response=${token}`,
   });
-  const data = await response.json();
+  const data: any = await response.json();
   return data.success && data.score >= 0.5; // score mínimo 0.5
 }
 
@@ -43,32 +44,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (action === 'signup') {
-      const { data: createdUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: false,
-        user_metadata: { username, phone },
-      });
+      const { data: createdUser, error: createError }: { data: any; error: any } =
+        await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: false,
+          user_metadata: { username, phone },
+        });
 
-      if (createError || !createdUser) return res.status(400).json({ success: false, error: createError?.message });
+      if (createError || !createdUser) {
+        return res.status(400).json({ success: false, error: createError?.message || 'Erro ao criar usuário' });
+      }
 
       const userId = createdUser.user?.id;
       if (!userId) return res.status(500).json({ success: false, error: 'Falha ao criar usuário' });
 
-      const { error: insertError } = await supabaseAdmin.from('users').insert([{ id: userId, username, phone }]);
+      const { error: insertError }: { error: any } = await supabaseAdmin
+        .from('users')
+        .insert([{ id: userId, username, phone }]);
+
       if (insertError) return res.status(500).json({ success: false, error: 'Falha ao criar perfil' });
 
       return res.status(201).json({ success: true, userId });
     }
 
     if (action === 'signin') {
-      const { data, error } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+      const { data, error }: { data: any; error: any } = await supabaseAdmin.auth.signInWithPassword({
+        email,
+        password,
+      });
+
       if (error) return res.status(401).json({ success: false, error: error.message });
       return res.status(200).json({ success: true, data });
     }
 
     return res.status(400).json({ success: false, error: 'Ação inválida' });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     return res.status(500).json({ success: false, error: 'Erro interno do servidor' });
   }
