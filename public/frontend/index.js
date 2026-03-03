@@ -67,7 +67,7 @@ function mostrarErro(mensagem, campo = null) {
 // Mostrar sucesso
 function mostrarSucesso(mensagem) {
     const resultado = document.getElementById('resultado');
-    if (result) {
+    if (resultado) {
         resultado.style.color = 'green';
         resultado.style.backgroundColor = '#eeffee';
         resultado.style.border = '1px solid #ccffcc';
@@ -116,7 +116,7 @@ window.onSubmit = function(token) {
     limparMensagens();
     const email = document.getElementById('email')?.value.trim();
     const password = document.getElementById('password')?.value;
-    const result = document.getElementById('resultado');
+    const resultado = document.getElementById('resultado');
     
     if (!email || !password) {
         alert('Preencha todos os campos');
@@ -129,7 +129,9 @@ window.onSubmit = function(token) {
         return;
     }
     
-    resultado.textContent = "🔄 Verificando...";
+    if (resultado) {
+        resultado.textContent = "🔄 Verificando...";
+    }
     
     // ===== SIMULAR DELAY DE REDE =====
     setTimeout(() => {
