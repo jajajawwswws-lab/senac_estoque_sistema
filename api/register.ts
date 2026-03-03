@@ -1,14 +1,28 @@
 // api/register.ts
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import fetch from 'node-fetch'; // necessário no Node.js para chamadas externas
 
-// Chaves hardcoded (não seguro, mas funcional)
+// Supabase
 const SUPABASE_URL = 'https://fbbkshvhbfgdopsgtlxi.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiYmtzaHZoYmZnZG9wc2d0bHhpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTg3MzYyOSwiZXhwIjoyMDg3NDQ5NjI5fQ.3a6zBgyKhPyUUIJLuaA8W3qEcv-_JfQsgDF_M9AAnQY';
 
 const supabaseAdmin: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
+
+// reCAPTCHA secret key (do Google)
+const RECAPTCHA_SECRET = '6LdIoX4sAAAAAA8_bs3lzReNDXama96FcCzrdpop';
+
+async function verifyRecaptcha(token: string) {
+  const response = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `secret=${RECAPTCHA_SECRET}&response=${token}`,
+  });
+  const data = await response.json();
+  return data.success && data.score >= 0.5; // score mínimo 0.5
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,9 +32,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
 
-  const { email, password, username, phone, action } = req.body ?? {};
+  const { email, password, username, phone, recaptchaToken, action } = req.body ?? {};
 
-  if (!email || !password || !username) return res.status(400).json({ success: false, error: 'Campos obrigatórios' });
+  if (!email || !password || !username || !recaptchaToken) {
+    return res.status(400).json({ success: false, error: 'Campos obrigatórios' });
+  }
+
+  // Verifica reCAPTCHA
+  const isHuman = await verifyRecaptcha(recaptchaToken);
+  if (!isHuman) return res.status(403).json({ success: false, error: 'Falha na verificação reCAPTCHA' });
 
   try {
     if (action === 'signup') {
