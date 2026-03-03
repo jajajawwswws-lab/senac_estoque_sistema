@@ -12,7 +12,7 @@ const supabaseAdmin: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVIC
 });
 
 // reCAPTCHA secret key
-const RECAPTCHA_SECRET = '6LdIoX4sAAAAAA8_bs3lzReNDXama96FcCzrdpop';
+const RECAPTCHA_SECRET = '6LeIrn4sAAAAALkozpnWO5bUCa9r1W-zTbi7c_fh';
 
 async function verifyRecaptcha(token: string): Promise<boolean> {
   const response = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
