@@ -10,7 +10,7 @@ const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3Mi
 const supabaseAdmin: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
-
+//q
 // reCAPTCHA secret key (do Google)
 const RECAPTCHA_SECRET = '6LdIoX4sAAAAAA8_bs3lzReNDXama96FcCzrdpop';
 
