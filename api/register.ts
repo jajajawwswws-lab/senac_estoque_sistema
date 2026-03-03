@@ -2,8 +2,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import fetch from 'node-fetch'; // necessário no Node.js para chamadas externas
-
-// Supabase
+//
+// Supabase s
 const SUPABASE_URL = 'https://fbbkshvhbfgdopsgtlxi.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiYmtzaHZoYmZnZG9wc2d0bHhpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTg3MzYyOSwiZXhwIjoyMDg3NDQ5NjI5fQ.3a6zBgyKhPyUUIJLuaA8W3qEcv-_JfQsgDF_M9AAnQY';
 
