@@ -6,7 +6,7 @@ window.onSubmit = function(token) {
     // A implementação será sobrescrita dentro do DOMContentLoaded
     // mas isso garante que a função existe quando o reCAPTCHA carregar
 };
-//ll
+//lll
 
 document.addEventListener('DOMContentLoaded', function() {
     // Elementos do DOM
@@ -414,5 +414,6 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmPasswordInput.dispatchEvent(new Event('input'));
     }, 100);
 });
+
 
 
