@@ -4,8 +4,9 @@
       "runtime": "@vercel/node@4.0.0"
     }
   },
+  "outputDirectory": "public/frontend",
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/frontend/$1" }
+    { "src": "/(.*)", "dest": "/public/frontend/$1" }
   ]
 }
