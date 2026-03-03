@@ -44,46 +44,23 @@ document.querySelectorAll('.switch input').forEach(input => {
 });
 
 // Alterar senha
-document.getElementById('btn-alterar-senha')?.addEventListener('click', () => {
-    const senhaAtual = prompt('Digite sua senha atual:');
-    const senhaCorreta = 'senha123'; // Exemplo
-    
-    if(senhaAtual === senhaCorreta){
-        const novaSenha = prompt('Digite sua nova senha (mínimo 8 caracteres):');
-        if(novaSenha && novaSenha.length >= 8){
+function alterar_senha() {
+    const senha = prompt("Digite sua senha atual: ");
+    const senha_correta = 'senha123'; // Exemplo de senha correta
+
+    if(senha === senha_correta) {
+        const nova_senha = prompt("Digite sua nova senha: ");
+        if(nova_senha && nova_senha.length >= 8) {
+            alert("Senha válida! Sua senha foi alterada.");
             showNotification('Senha alterada com sucesso!', 'success');
         } else {
+            alert("Sua senha não preenche os 8 caracteres requisitados.");
             showNotification('Senha inválida! Min. 8 caracteres.', 'error');
         }
     } else {
+        alert("Senha incorreta!");
         showNotification('Senha incorreta!', 'error');
     }
-});
-
-// Notification function
-function showNotification(message, type='info'){
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full ${
-        type==='success' ? 'bg-green-100 text-green-800 border border-green-200' :
-        type==='error' ? 'bg-red-100 text-red-800 border border-red-200' :
-        'bg-blue-100 text-blue-800 border border-blue-200'
-    }`;
-    notification.innerHTML = `<div class="flex items-center">
-        <i class="fas ${
-            type==='success' ? 'fa-check-circle' :
-            type==='error' ? 'fa-exclamation-circle' : 'fa-info-circle'
-        } mr-3"></i><span>${message}</span>
-    </div>`;
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.classList.remove('translate-x-full');
-        notification.classList.add('translate-x-0');
-    }, 10);
-
-    setTimeout(() => {
-        notification.classList.remove('translate-x-0');
-        notification.classList.add('translate-x-full');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
 }
+
+//
