@@ -1,5 +1,5 @@
 // ===== CONFIGURAÇÃO DA API =====
-
+//
 const API_URL = '/api/account';
 document.addEventListener("DOMContentLoaded", () => {
   console.log("📄 Página carregada");
